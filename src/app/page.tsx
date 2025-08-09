@@ -7,23 +7,33 @@ export default function HomePage() {
   return (
     <main>
       <div className="relative h-screen w-screen">
-        {/* Map */}
+        {/* Layer 1: Map */}
         <div className="absolute inset-0">
           <MapComponent />
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-black/45 pointer-events-none" />
         </div>
 
+        {/* Layer 2: Overlay */}
+        <div className="absolute inset-0  bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.81)_0%,_rgba(0,0,0,0.60)_20%,_transparent_80%)] pointer-events-none" />
 
-        <div className="relative z-10 flex justify-center items-center h-full">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-xl w-full">
-            <p className="text-gray-500 mt-2">Discover top properties near you</p>
-            {/* <SearchBar /> */}
-            {/* <FiltersRow /> */}
+        {/* Layer 3: UI Content */}
+        <div className="relative z-10 flex flex-col justify-center items-center h-full pointer-events-none">
+
+          <div className="pointer-events-auto">
+            <NavBar logoHeight={200} logoWidth={200} />
           </div>
+
+          <div className="mt-4 bg-white rounded-2xl shadow-xl p-6 max-w-xl w-full pointer-events-auto">
+            <input
+              className="text-xl text-gray-500 mt-2 w-full border-none focus:outline-none caret-black"
+              placeholder="Discover best properties near you matching your needs"
+            />
+          </div>
+          <button className="text-xl mt-4 bg-[#f75c5f] text-white rounded-2xl py-2 px-4">
+            Find Properties
+          </button>
+
         </div>
       </div>
-
     </main>
   );
 }

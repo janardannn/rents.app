@@ -1,9 +1,8 @@
-export const NavBar = () => {
+import Logo from "../logo/logo";
+
+export const NavBar = ({ logoHeight, logoWidth }: { logoHeight: number, logoWidth: number }) => {
     return (
-        <div className="top-bar">
-            <h1>rents.app</h1>
-            <p>Find your next rental property</p>
-        </div>
-    );
+        <Logo height={logoHeight} width={logoWidth} />
+    )
 }
 export default NavBar;
