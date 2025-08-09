@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Paytone_One, Outfit } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -11,6 +11,20 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap"
+});
+
+const paytone = Paytone_One({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-paytone",
+  display: "swap"
+});
+
 
 export const metadata: Metadata = {
   title: "rents.app",
@@ -25,7 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} ${paytone.variable} antialiased`}
       >
         {children}
       </body>
