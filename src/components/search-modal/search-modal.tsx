@@ -1,13 +1,19 @@
+"use client";
+
 import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { useForm, Controller } from "react-hook-form";
 import * as Slider from "@radix-ui/react-slider";
+import { SearchBox } from "@mapbox/search-js-react";
+import { SearchModalType } from "@/types/search-modal-type";
 
 const SearchModal = () => {
     const [isOpen, setIsOpen] = useState(false);
 
-    const { register, handleSubmit, control, watch, reset } = useForm({
+    const { register, handleSubmit, control, watch, reset, setValue } = useForm<SearchModalType>({
         defaultValues: {
+            location: "",
+            placeDetails: null,
             propertyType: {
                 pg: false,
                 flat: false,
@@ -20,7 +26,7 @@ const SearchModal = () => {
 
     const budgetValues = watch("budget");
 
-    const onApplyFilters = (data) => {
+    const onApplyFilters = (data: any) => {
         console.log("Applied Filters:", data);
         setIsOpen(false);
     };
@@ -51,6 +57,39 @@ const SearchModal = () => {
                                 Filters
                             </Dialog.Title>
                             <div className="mt-6 space-y-6">
+                                {/* --- START OF ADDED SECTION --- */}
+                                <div>
+                                    <h3 className="font-semibold text-gray-800">Location</h3>
+                                    <div className="mt-2">
+
+
+                                        {/* Mapbox places API/ search API here 
+                                        didnt use google places API as 1000rs min mandatory deposit
+                                        which will be used as credits after 200$ limit*/}
+                                        <SearchBox
+                                            accessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN as string}
+                                            onRetrieve={(result) => {
+                                                const selectedFeature = result.features[0];
+                                                setValue("location", selectedFeature.properties.full_address);
+                                                setValue("placeDetails", {
+                                                    name: selectedFeature.properties.name,
+                                                    address: selectedFeature.properties.full_address,
+                                                    coords: {
+                                                        lng: selectedFeature.geometry.coordinates[0],
+                                                        lat: selectedFeature.geometry.coordinates[1],
+                                                    }
+                                                });
+                                            }}
+                                            options={{
+                                                language: "en",
+                                                country: "IN",
+                                            }}
+                                        />
+
+                                    </div>
+                                </div>
+
+
                                 <div>
                                     <h3 className="font-semibold text-gray-800">Property Type</h3>
                                     <div className="mt-2 flex flex-wrap gap-4">
@@ -105,7 +144,7 @@ const SearchModal = () => {
                                                     max={100000}
                                                     step={500}
                                                 >
-                                                    <Slider.Track className="bg-gray-200 relative grow rounded-full h-[3px]">
+                                                    <Slider.Track className="bg-gray-400 relative grow rounded-full h-[3px]">
                                                         <Slider.Range className="absolute bg-[#f75c5f] rounded-full h-full" />
                                                     </Slider.Track>
                                                     <Slider.Thumb className="border block w-5 h-5 bg-white shadow-md rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f75c5f]" />
