@@ -40,10 +40,14 @@ const SearchModal = () => {
 
     const budgetValues = watch("budget");
 
-    const onApplyFilters = (data: any) => {
+    const onApplyFilters = (data: SearchModalType) => {
         console.log("Applied Filters:", data);
         setApplied(true);
-        setDisplayText(`${Object.keys(data.propertyType).filter(key => data.propertyType[key]).join(", ")} in ${data.location} with budget ₹${data.budget[0]} - ₹${data.budget[1]} `);
+        setDisplayText(
+            `${(Object.keys(data.propertyType) as Array<keyof typeof data.propertyType>)
+                .filter((key) => data.propertyType[key])
+                .join(", ")} in ${data.location} with budget ₹${data.budget[0]} - ₹${data.budget[1]}`
+        );
         setIsOpen(false);
     };
 
