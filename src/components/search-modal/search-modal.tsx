@@ -4,8 +4,19 @@ import { useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { useForm, Controller, set } from "react-hook-form";
 import * as Slider from "@radix-ui/react-slider";
-import { SearchBox } from "@mapbox/search-js-react";
+
 import { SearchModalType } from "@/types/search-modal-type";
+
+// even with use client, SearchBox internals is causing SSR troubles
+// import { SearchBox } from "@mapbox/search-js-react";
+
+import dynamic from "next/dynamic";
+const SearchBox = dynamic(
+    () => import("@mapbox/search-js-react").then(mod => mod.SearchBox),
+    {
+        ssr: false,
+    }
+)
 
 const SearchModal = () => {
     const [isOpen, setIsOpen] = useState(false);
