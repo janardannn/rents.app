@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { Dialog } from "@headlessui/react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, set } from "react-hook-form";
 import * as Slider from "@radix-ui/react-slider";
 import { SearchBox } from "@mapbox/search-js-react";
 import { SearchModalType } from "@/types/search-modal-type";
 
 const SearchModal = () => {
     const [isOpen, setIsOpen] = useState(false);
+
+    const [displayText, setDisplayText] = useState("Discover best properties near you matching your checklist");
+    const [applied, setApplied] = useState(false);
 
     const { register, handleSubmit, control, watch, reset, setValue } = useForm<SearchModalType>({
         defaultValues: {
@@ -28,6 +31,8 @@ const SearchModal = () => {
 
     const onApplyFilters = (data: any) => {
         console.log("Applied Filters:", data);
+        setApplied(true);
+        setDisplayText(`${Object.keys(data.propertyType).filter(key => data.propertyType[key]).join(", ")} in ${data.location} with budget ₹${data.budget[0]} - ₹${data.budget[1]} `);
         setIsOpen(false);
     };
 
@@ -177,8 +182,9 @@ const SearchModal = () => {
 
             <div
                 onClick={handleClick}
-                className="search-modal mt-4 bg-white rounded-xl shadow-xl p-6 max-w-xl w-full pointer-events-auto cursor-pointer text-xl text-gray-500 border-none">
-                Discover best properties near you matching your checklist
+                className={`search-modal mt-4 bg-white rounded-xl shadow-xl p-6 max-w-xl w-full pointer-events-auto cursor-pointer text-xl border-none ${applied ? "text-gray-800" : "text-gray-500"}`}
+            >
+                {displayText}
             </div>
         </>
     );
