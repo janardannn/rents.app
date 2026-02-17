@@ -1,0 +1,52 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [postgis]
+}
+
+enum Role {
+  USER
+  OWNER
+  BROKER
+}
+
+enum PropertyType {
+  PG
+  FLAT
+  SHARED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  listings  Listing[]
+
+  @@map("users")
+}
+
+model Listing {
+  id           String       @id @default(cuid())
+  title        String
+  description  String
+  rent         Int
+  propertyType PropertyType
+  address      String
+  images       String[]
+  userId       String
+  user         User         @relation(fields: [userId], references: [id])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@map("listings")
+}
