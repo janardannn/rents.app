@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { createListingSchema } from "@/lib/validations/listing";
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!["OWNER", "BROKER"].includes(session.user.role)) {
+      return NextResponse.json({ error: "Only owners and brokers can create listings" }, { status: 403 });
+    }
+
     const body = await request.json();
     const parsed = createListingSchema.safeParse(body);
 
@@ -29,7 +40,7 @@ export async function POST(request: NextRequest) {
       longitude,
       latitude,
       images,
-      "TODO_AUTH_USER_ID"
+      session.user.id
     );
 
     return NextResponse.json({ id: listing[0].id }, { status: 201 });
