@@ -2,13 +2,10 @@
 
 import { useState } from "react";
 import { Dialog } from "@headlessui/react";
-import { useForm, Controller, set } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import * as Slider from "@radix-ui/react-slider";
 
 import { SearchModalType } from "@/types/search-modal-type";
-
-// even with use client, SearchBox internals is causing SSR troubles
-// import { SearchBox } from "@mapbox/search-js-react";
 
 import dynamic from "next/dynamic";
 const SearchBox = dynamic(
@@ -18,7 +15,11 @@ const SearchBox = dynamic(
     }
 )
 
-const SearchModal = () => {
+interface SearchModalProps {
+    onApplyFilters?: (data: SearchModalType) => void;
+}
+
+const SearchModal = ({ onApplyFilters }: SearchModalProps) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const [displayText, setDisplayText] = useState("Discover best properties near you matching your checklist");
@@ -40,8 +41,7 @@ const SearchModal = () => {
 
     const budgetValues = watch("budget");
 
-    const onApplyFilters = (data: SearchModalType) => {
-        console.log("Applied Filters:", data);
+    const onSubmit = (data: SearchModalType) => {
         setApplied(true);
         setDisplayText(
             `${(Object.keys(data.propertyType) as Array<keyof typeof data.propertyType>)
@@ -49,6 +49,7 @@ const SearchModal = () => {
                 .join(", ")} in ${data.location} with budget ₹${data.budget[0]} - ₹${data.budget[1]}`
         );
         setIsOpen(false);
+        onApplyFilters?.(data);
     };
 
     const handleClear = () => {
@@ -72,20 +73,14 @@ const SearchModal = () => {
                 />
                 <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
                     <Dialog.Panel className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
-                        <form onSubmit={handleSubmit(onApplyFilters)}>
+                        <form onSubmit={handleSubmit(onSubmit)}>
                             <Dialog.Title className="text-2xl font-bold text-gray-900">
                                 Filters
                             </Dialog.Title>
                             <div className="mt-6 space-y-6">
-                                {/* --- START OF ADDED SECTION --- */}
                                 <div>
                                     <h3 className="font-semibold text-gray-800">Location</h3>
                                     <div className="mt-2">
-
-
-                                        {/* Mapbox places API/ search API here 
-                                        didnt use google places API as 1000rs min mandatory deposit
-                                        which will be used as credits after 200$ limit*/}
                                         <SearchBox
                                             accessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN as string}
                                             onRetrieve={(result) => {
@@ -105,10 +100,8 @@ const SearchModal = () => {
                                                 country: "IN",
                                             }}
                                         />
-
                                     </div>
                                 </div>
-
 
                                 <div>
                                     <h3 className="font-semibold text-gray-800">Property Type</h3>

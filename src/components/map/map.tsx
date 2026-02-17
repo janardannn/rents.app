@@ -2,19 +2,24 @@
 
 import MapboxMap from "./mapbox";
 import { useUserLocation } from "@/hooks/use-user-location";
+import type { ListingResult } from "@/types/listing";
 
-const MapComponent = () => {
+interface MapComponentProps {
+    listings?: ListingResult[];
+    flyTo?: { lng: number; lat: number } | null;
+}
+
+const MapComponent = ({ listings = [], flyTo }: MapComponentProps) => {
     const userLocation = useUserLocation();
-
-    // Map component goes here
-    // Map rendering logic, hooks, and state management can be added here
-    // This component should be abstracted to handle all providers
-    // All other components just see this as a black box and pass expected props
-    // MapBox, Leaflet, Google Maps
 
     return (
         <div>
-            <MapboxMap latitude={userLocation.latitude} longitude={userLocation.longitude} />
+            <MapboxMap
+                latitude={userLocation.latitude}
+                longitude={userLocation.longitude}
+                listings={listings}
+                flyTo={flyTo}
+            />
         </div>
     );
 }
