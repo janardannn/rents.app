@@ -47,15 +47,7 @@ export default function MapboxMap({ latitude, longitude, listings = [], flyTo }:
         markersRef.current = [];
 
         listings.forEach(listing => {
-            const el = document.createElement("div");
-            el.style.width = "12px";
-            el.style.height = "12px";
-            el.style.borderRadius = "50%";
-            el.style.backgroundColor = "#f75c5f";
-            el.style.border = "2px solid white";
-            el.style.boxShadow = "0 1px 4px rgba(0,0,0,0.3)";
-
-            const popup = new mapboxgl.Popup({ offset: 12 }).setHTML(
+            const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
                 `<div style="font-family:sans-serif;font-size:13px;">
                     <strong>${listing.title}</strong><br/>
                     <span style="color:#f75c5f;font-weight:600;">₹${listing.rent}/mo</span><br/>
@@ -63,7 +55,7 @@ export default function MapboxMap({ latitude, longitude, listings = [], flyTo }:
                 </div>`
             );
 
-            const marker = new mapboxgl.Marker(el)
+            const marker = new mapboxgl.Marker({ color: "#f75c5f" })
                 .setLngLat([listing.longitude, listing.latitude])
                 .setPopup(popup)
                 .addTo(mapInstance.current!);

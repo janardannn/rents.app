@@ -1,0 +1,18 @@
+INSERT INTO users (id, name, email, password, phone, role, "createdAt", "updatedAt") VALUES
+('owner_ravi', 'Ravi Kumar', 'ravi@example.com', '$2b$12$kHtGnvh2Blgm/M1kMidtXOZjus65N/SIcy89DoEhTeaHapQY6dTZa', '9876543210', 'OWNER', NOW(), NOW()),
+('owner_priya', 'Priya Sharma', 'priya@example.com', '$2b$12$kHtGnvh2Blgm/M1kMidtXOZjus65N/SIcy89DoEhTeaHapQY6dTZa', '9876543211', 'OWNER', NOW(), NOW()),
+('broker_anand', 'Anand Reddy', 'anand@example.com', '$2b$12$kHtGnvh2Blgm/M1kMidtXOZjus65N/SIcy89DoEhTeaHapQY6dTZa', '9876543212', 'BROKER', NOW(), NOW());
+
+INSERT INTO listings (id, title, description, rent, "propertyType", address, location, images, "userId", "createdAt", "updatedAt") VALUES
+('l01', 'Cozy PG near Koramangala', 'Furnished PG with wifi, food, and laundry included. Walking distance to Sony Signal.', 8500, 'PG', 'Koramangala 4th Block, Bangalore', ST_SetSRID(ST_MakePoint(77.6197, 12.9352), 4326)::geography, '{}', 'owner_ravi', NOW(), NOW()),
+('l02', 'Spacious 2BHK in Indiranagar', 'Semi-furnished flat with balcony, 2 bathrooms, gated community. Close to 100ft Road.', 25000, 'FLAT', '100 Feet Road, Indiranagar, Bangalore', ST_SetSRID(ST_MakePoint(77.6408, 12.9784), 4326)::geography, '{}', 'owner_ravi', NOW(), NOW()),
+('l03', 'Budget PG in BTM Layout', 'Triple sharing PG with AC, meals, and power backup. 5 min from Silk Board.', 6000, 'PG', 'BTM Layout 2nd Stage, Bangalore', ST_SetSRID(ST_MakePoint(77.6101, 12.9166), 4326)::geography, '{}', 'owner_priya', NOW(), NOW()),
+('l04', 'Shared Room near HSR Layout', 'Double sharing room in a 3BHK apartment. Gym and parking available.', 7500, 'SHARED', 'HSR Layout Sector 2, Bangalore', ST_SetSRID(ST_MakePoint(77.6500, 12.9116), 4326)::geography, '{}', 'owner_priya', NOW(), NOW()),
+('l05', '1BHK near Marathahalli', 'Fully furnished 1BHK close to Outer Ring Road. Ideal for working professionals.', 18000, 'FLAT', 'Marathahalli Bridge, Bangalore', ST_SetSRID(ST_MakePoint(77.7010, 12.9591), 4326)::geography, '{}', 'broker_anand', NOW(), NOW()),
+('l06', 'PG near Whitefield', 'AC PG with single occupancy rooms. Food and housekeeping included.', 12000, 'PG', 'Whitefield Main Road, Bangalore', ST_SetSRID(ST_MakePoint(77.7510, 12.9698), 4326)::geography, '{}', 'broker_anand', NOW(), NOW()),
+('l07', '3BHK in JP Nagar', 'Unfurnished 3BHK in a quiet residential area. Close to metro station.', 22000, 'FLAT', 'JP Nagar 6th Phase, Bangalore', ST_SetSRID(ST_MakePoint(77.5855, 12.9063), 4326)::geography, '{}', 'owner_ravi', NOW(), NOW()),
+('l08', 'Shared Flat in Electronic City', 'Sharing in a furnished 2BHK. Infosys and Wipro campuses nearby.', 5500, 'SHARED', 'Electronic City Phase 1, Bangalore', ST_SetSRID(ST_MakePoint(77.6700, 12.8456), 4326)::geography, '{}', 'owner_priya', NOW(), NOW()),
+('l09', 'PG near Yelahanka', 'Girls PG with CCTV, biometric entry. Near IAF station and malls.', 7000, 'PG', 'Yelahanka New Town, Bangalore', ST_SetSRID(ST_MakePoint(77.5963, 13.1007), 4326)::geography, '{}', 'broker_anand', NOW(), NOW()),
+('l10', 'Studio Flat in MG Road', 'Compact studio apartment in the heart of the city. Metro accessible.', 20000, 'FLAT', 'MG Road, Bangalore', ST_SetSRID(ST_MakePoint(77.6065, 12.9756), 4326)::geography, '{}', 'broker_anand', NOW(), NOW()),
+('l11', 'PG in Jayanagar', 'Boys PG with home-cooked meals. Near Jayanagar 4th Block shopping complex.', 9000, 'PG', 'Jayanagar 4th Block, Bangalore', ST_SetSRID(ST_MakePoint(77.5820, 12.9255), 4326)::geography, '{}', 'owner_ravi', NOW(), NOW()),
+('l12', 'Shared Room near Bellandur', 'Triple sharing in a gated society. Pool and gym access. Near Bellandur Lake.', 4500, 'SHARED', 'Bellandur, Bangalore', ST_SetSRID(ST_MakePoint(77.6760, 12.9260), 4326)::geography, '{}', 'owner_priya', NOW(), NOW());
