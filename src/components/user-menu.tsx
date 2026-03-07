@@ -50,16 +50,16 @@ export default function UserMenu({ variant = "floating" }: UserMenuProps) {
     const initial = (session.user?.name?.[0] || session.user?.email?.[0] || "U").toUpperCase();
 
     return (
-        <div className={variant === "floating" ? "fixed top-5 right-5 z-50" : ""} ref={menuRef}>
+        <div className={`relative ${variant === "floating" ? "fixed top-5 right-5 z-50" : ""}`} ref={menuRef}>
             <button
                 onClick={() => setOpen(o => !o)}
-                className="w-9 h-9 rounded-full bg-gray-900 hover:bg-gray-800 flex items-center justify-center text-sm font-bold text-white cursor-pointer transition-colors shadow-lg"
+                className={`w-9 h-9 rounded-full bg-gray-900 hover:bg-gray-800 flex items-center justify-center text-sm font-bold text-white cursor-pointer transition-colors ${variant === "floating" ? "shadow-lg" : ""}`}
             >
                 {initial}
             </button>
 
             {open && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                <div className={`absolute mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 ${variant === "inline" ? "left-0" : "right-0"}`}>
                     <div className="px-4 py-2 border-b border-gray-100">
                         <p className="text-sm font-medium text-gray-900 truncate">{session.user?.name}</p>
                         <p className="text-xs text-gray-400 truncate">{session.user?.email}</p>
