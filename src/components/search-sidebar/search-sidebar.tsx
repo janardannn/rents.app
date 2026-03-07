@@ -102,11 +102,12 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
 
     return (
         <div className="h-full flex flex-col bg-white">
-            <div className="px-4 py-3 border-b border-gray-100">
+            <div className="px-4 py-3 border-b border-gray-100 shrink-0">
                 <Logo height={100} width={100} />
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="shrink-0 overflow-y-auto p-5 space-y-6">
+            <div className="flex-1 overflow-y-auto">
+            <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-6">
                 <div>
                     <h3 className="text-sm font-semibold text-gray-800">Location</h3>
                     <div className="mt-2">
@@ -238,7 +239,7 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
             </form>
 
             {listings.length > 0 && (
-                <div className="border-t border-gray-100 flex-1 overflow-y-auto">
+                <div className="border-t border-gray-100">
                     <div className="p-4 pb-1">
                         <h3 className="text-sm font-semibold text-gray-800">{listings.length} Properties Found</h3>
                     </div>
@@ -253,6 +254,7 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
                     </div>
                 </div>
             )}
+            </div>
         </div>
     );
 }

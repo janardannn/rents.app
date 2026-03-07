@@ -6,14 +6,17 @@ import MapComponent from "@/components/map/map";
 import SearchSidebar, { type SearchFilters } from "@/components/search-sidebar/search-sidebar";
 import ListingDetailPanel from "@/components/listing-detail/listing-detail";
 import type { ListingResult } from "@/types/listing";
+import type { ListingDetail } from "@/types/listing-detail";
 
 function SearchContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
     const [listings, setListings] = useState<ListingResult[]>([]);
-    const [flyTo, setFlyTo] = useState<{ lng: number; lat: number } | null>(null);
-    const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
+    const [flyTo, setFlyTo] = useState<{ lng: number; lat: number; zoom?: number; _t?: number } | null>(null);
+    const [selectedListingId, setSelectedListingId] = useState<string | null>(
+        searchParams.get("listing")
+    );
 
     const filters: SearchFilters = {
         lat: Number(searchParams.get("lat")) || 0,
@@ -53,7 +56,10 @@ function SearchContent() {
 
     useEffect(() => {
         if (filters.lat && filters.lng) {
-            setFlyTo({ lng: filters.lng, lat: filters.lat });
+            // Don't override if we're opening a shared listing — onLoaded will handle flyTo
+            if (!searchParams.get("listing")) {
+                setFlyTo({ lng: filters.lng, lat: filters.lat, _t: Date.now() });
+            }
             fetchListings(filters);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -61,10 +67,13 @@ function SearchContent() {
 
     const handleListingClick = (listing: ListingResult) => {
         setSelectedListingId(listing.id);
+        setFlyTo({ lng: listing.longitude, lat: listing.latitude, _t: Date.now() });
     };
 
     const handleMapPinClick = (listingId: string) => {
         setSelectedListingId(listingId);
+        const listing = listings.find(l => l.id === listingId);
+        if (listing) setFlyTo({ lng: listing.longitude, lat: listing.latitude, _t: Date.now() });
     };
 
     const handleFiltersChange = (newFilters: SearchFilters) => {
@@ -94,10 +103,15 @@ function SearchContent() {
                 />
             </div>
             <div className="flex-1 relative overflow-hidden">
-                <MapComponent listings={listings} flyTo={flyTo} onListingClick={handleMapPinClick} showViewToggle />
+                <MapComponent listings={listings} flyTo={flyTo} onListingClick={handleMapPinClick} selectedListingId={selectedListingId} showViewToggle />
                 <ListingDetailPanel
                     listingId={selectedListingId}
                     onClose={() => setSelectedListingId(null)}
+                    onLoaded={(detail: ListingDetail) => {
+                        if (detail.longitude && detail.latitude) {
+                            setFlyTo({ lng: detail.longitude, lat: detail.latitude, zoom: 15, _t: Date.now() });
+                        }
+                    }}
                 />
             </div>
         </div>
