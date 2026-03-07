@@ -261,15 +261,16 @@ export default function MapboxMap({ listings = [], flyTo, onListingClick, select
         if (!map || !flyTo) return;
 
         if (!sourceReady.current) {
-            // Map hasn't loaded yet — defer
+            // Map hasn't loaded yet — capture values and defer
+            const { lng, lat, zoom } = flyTo;
+            const pitch = view === "3D" ? 72 : 0;
             map.once("load", () => {
-                const opts: mapboxgl.FlyToOptions = {
-                    center: [flyTo.lng, flyTo.lat],
-                    pitch: view === "3D" ? 72 : 0,
+                map.flyTo({
+                    center: [lng, lat],
+                    zoom: zoom ?? 16,
+                    pitch,
                     duration: 1500,
-                };
-                if (flyTo.zoom != null) opts.zoom = flyTo.zoom;
-                map.flyTo(opts);
+                });
             });
             return;
         }
@@ -280,7 +281,7 @@ export default function MapboxMap({ listings = [], flyTo, onListingClick, select
         const panelWidth = containerWidth * 0.45;
         const offsetX = hasPanel ? panelWidth / 2 : 0;
 
-        const opts: mapboxgl.FlyToOptions = {
+        const opts: Parameters<typeof map.flyTo>[0] = {
             center: [flyTo.lng, flyTo.lat],
             pitch: view === "3D" ? 72 : 0,
             duration: 1500,

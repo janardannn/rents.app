@@ -59,7 +59,7 @@ function SearchContent() {
         if (filters.lat && filters.lng) {
             // Don't override if we're opening a shared listing — onLoaded will handle flyTo
             if (!searchParams.get("listing")) {
-                setFlyTo({ lng: filters.lng, lat: filters.lat, zoom: isFirstLoad.current ? 12 : undefined, _t: Date.now() });
+                setFlyTo({ lng: filters.lng, lat: filters.lat, zoom: isFirstLoad.current ? 16 : undefined, _t: Date.now() });
             }
             isFirstLoad.current = false;
             fetchListings(filters);
