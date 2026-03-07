@@ -12,6 +12,8 @@
     "@auth/prisma-adapter": "^2.11.1",
     "@headlessui/react": "^2.2.7",
     "@mapbox/search-js-react": "^1.3.0",
+    "@neondatabase/serverless": "^1.0.2",
+    "@prisma/adapter-neon": "^7.4.2",
     "@prisma/client": "^7.4.0",
     "@radix-ui/react-slider": "^1.3.6",
     "bcryptjs": "^3.0.3",
