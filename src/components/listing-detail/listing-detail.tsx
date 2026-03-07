@@ -269,15 +269,11 @@ export default function ListingDetailPanel({ listingId, onClose, onLoaded }: Lis
                                     <span className="text-gray-500">Maintenance</span>
                                     <span className="text-gray-900 font-medium">{detail.maintenance ? `₹${detail.maintenance.toLocaleString("en-IN")}/mo` : "—"}</span>
                                 </div>
-                                {detail.maintenance && (
-                                    <>
-                                        <div className="border-t border-dashed border-gray-200" />
-                                        <div className="flex justify-between font-semibold">
-                                            <span className="text-gray-700">Total Monthly</span>
-                                            <span className="text-gray-900">₹{totalMonthly.toLocaleString("en-IN")}</span>
-                                        </div>
-                                    </>
-                                )}
+                                <div className="border-t border-dashed border-gray-200" />
+                                <div className="flex justify-between font-semibold">
+                                    <span className="text-gray-700">Total Monthly</span>
+                                    <span className="text-gray-900">₹{totalMonthly.toLocaleString("en-IN")}</span>
+                                </div>
                             </div>
                         </div>
 
