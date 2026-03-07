@@ -1,7 +1,9 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
 
-CREATE TYPE "Role" AS ENUM ('USER', 'OWNER', 'BROKER');
+CREATE TYPE "Role" AS ENUM ('USER', 'OWNER', 'ADMIN');
+CREATE TYPE "OwnerType" AS ENUM ('INDIVIDUAL', 'BROKER');
 CREATE TYPE "PropertyType" AS ENUM ('PG', 'FLAT', 'SHARED');
+CREATE TYPE "FurnishingStatus" AS ENUM ('FURNISHED', 'SEMI_FURNISHED', 'UNFURNISHED');
 
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
@@ -10,6 +12,7 @@ CREATE TABLE "users" (
     "password" TEXT NOT NULL,
     "phone" TEXT,
     "role" "Role" NOT NULL DEFAULT 'USER',
+    "ownerType" "OwnerType",
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -21,7 +24,17 @@ CREATE TABLE "listings" (
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "rent" INTEGER NOT NULL,
+    "deposit" INTEGER,
+    "maintenance" INTEGER,
     "propertyType" "PropertyType" NOT NULL,
+    "furnishing" "FurnishingStatus" NOT NULL DEFAULT 'SEMI_FURNISHED',
+    "bedrooms" INTEGER,
+    "bathrooms" INTEGER,
+    "floor" INTEGER,
+    "totalFloors" INTEGER,
+    "area" INTEGER,
+    "amenities" TEXT[],
+    "availableFrom" TIMESTAMP(3),
     "address" TEXT NOT NULL,
     "location" geography(Point, 4326) NOT NULL,
     "images" TEXT[],

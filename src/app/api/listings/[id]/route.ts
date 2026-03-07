@@ -10,11 +10,14 @@ export async function GET(
     const prisma = await getPrisma();
 
     const listings = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
-      `SELECT l."id", l."title", l."description", l."rent", l."propertyType", l."address", l."images",
+      `SELECT l."id", l."title", l."description", l."rent", l."deposit", l."maintenance",
+              l."propertyType", l."furnishing", l."bedrooms", l."bathrooms",
+              l."floor", l."totalFloors", l."area", l."amenities", l."availableFrom",
+              l."address", l."images",
               ST_X(l."location"::geometry) as longitude,
               ST_Y(l."location"::geometry) as latitude,
               l."createdAt", l."updatedAt",
-              u."id" as "userId", u."name" as "ownerName", u."role" as "ownerType", u."phone" as "ownerPhone"
+              u."id" as "userId", u."name" as "ownerName", u."ownerType" as "ownerType", u."phone" as "ownerPhone"
        FROM listings l
        JOIN users u ON l."userId" = u."id"
        WHERE l."id" = $1`,

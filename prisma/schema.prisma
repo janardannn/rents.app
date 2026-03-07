@@ -12,6 +12,11 @@ datasource db {
 enum Role {
   USER
   OWNER
+  ADMIN
+}
+
+enum OwnerType {
+  INDIVIDUAL
   BROKER
 }
 
@@ -21,32 +26,49 @@ enum PropertyType {
   SHARED
 }
 
+enum FurnishingStatus {
+  FURNISHED
+  SEMI_FURNISHED
+  UNFURNISHED
+}
+
 model User {
-  id        String   @id @default(cuid())
+  id        String      @id @default(cuid())
   name      String
-  email     String   @unique
+  email     String      @unique
   password  String
   phone     String?
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      Role        @default(USER)
+  ownerType OwnerType?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   listings  Listing[]
 
   @@map("users")
 }
 
 model Listing {
-  id           String       @id @default(cuid())
+  id           String           @id @default(cuid())
   title        String
   description  String
   rent         Int
+  deposit      Int?
+  maintenance  Int?
   propertyType PropertyType
+  furnishing   FurnishingStatus @default(SEMI_FURNISHED)
+  bedrooms     Int?
+  bathrooms    Int?
+  floor        Int?
+  totalFloors  Int?
+  area         Int?
+  amenities    String[]
+  availableFrom DateTime?
   address      String
   images       String[]
   userId       String
-  user         User         @relation(fields: [userId], references: [id])
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  user         User             @relation(fields: [userId], references: [id])
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
   @@map("listings")
 }

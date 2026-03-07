@@ -18,6 +18,9 @@ export interface SearchFilters {
     lng: number;
     propertyType: string[];
     ownerType: string[];
+    furnishing: string[];
+    bedrooms: number | null;
+    sortBy: string;
     minRent: number;
     maxRent: number;
 }
@@ -30,6 +33,11 @@ interface FormValues {
     shared: boolean;
     ownerOwner: boolean;
     ownerBroker: boolean;
+    furnished: boolean;
+    semiFurnished: boolean;
+    unfurnished: boolean;
+    bedrooms: string;
+    sortBy: string;
     budget: [number, number];
 }
 
@@ -48,8 +56,13 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
             pg: initialFilters.propertyType.includes("PG"),
             flat: initialFilters.propertyType.includes("FLAT"),
             shared: initialFilters.propertyType.includes("SHARED"),
-            ownerOwner: initialFilters.ownerType.includes("OWNER"),
+            ownerOwner: initialFilters.ownerType.includes("INDIVIDUAL"),
             ownerBroker: initialFilters.ownerType.includes("BROKER"),
+            furnished: initialFilters.furnishing.includes("FURNISHED"),
+            semiFurnished: initialFilters.furnishing.includes("SEMI_FURNISHED"),
+            unfurnished: initialFilters.furnishing.includes("UNFURNISHED"),
+            bedrooms: initialFilters.bedrooms ? String(initialFilters.bedrooms) : "",
+            sortBy: initialFilters.sortBy || "distance",
             budget: [initialFilters.minRent, initialFilters.maxRent],
         },
     });
@@ -65,8 +78,13 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
         if (data.shared) types.push("SHARED");
 
         const owners: string[] = [];
-        if (data.ownerOwner) owners.push("OWNER");
+        if (data.ownerOwner) owners.push("INDIVIDUAL");
         if (data.ownerBroker) owners.push("BROKER");
+
+        const furn: string[] = [];
+        if (data.furnished) furn.push("FURNISHED");
+        if (data.semiFurnished) furn.push("SEMI_FURNISHED");
+        if (data.unfurnished) furn.push("UNFURNISHED");
 
         onFiltersChange({
             location: data.location,
@@ -74,6 +92,9 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
             lng: data.coords.lng,
             propertyType: types,
             ownerType: owners,
+            furnishing: furn,
+            bedrooms: data.bedrooms ? Number(data.bedrooms) : null,
+            sortBy: data.sortBy,
             minRent: data.budget[0],
             maxRent: data.budget[1],
         });
@@ -124,6 +145,36 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
                 </div>
 
                 <div>
+                    <h3 className="text-sm font-semibold text-gray-800">Furnishing</h3>
+                    <div className="mt-2 flex flex-wrap gap-3">
+                        <label className="flex items-center space-x-2 text-sm">
+                            <input type="checkbox" {...register("furnished")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
+                            <span>Furnished</span>
+                        </label>
+                        <label className="flex items-center space-x-2 text-sm">
+                            <input type="checkbox" {...register("semiFurnished")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
+                            <span>Semi</span>
+                        </label>
+                        <label className="flex items-center space-x-2 text-sm">
+                            <input type="checkbox" {...register("unfurnished")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
+                            <span>Unfurnished</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 className="text-sm font-semibold text-gray-800">BHK</h3>
+                    <select {...register("bedrooms")} className="mt-2 w-full text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-red-400 focus:border-transparent">
+                        <option value="">Any</option>
+                        <option value="1">1 BHK</option>
+                        <option value="2">2 BHK</option>
+                        <option value="3">3 BHK</option>
+                        <option value="4">4 BHK</option>
+                        <option value="5">5+ BHK</option>
+                    </select>
+                </div>
+
+                <div>
                     <h3 className="text-sm font-semibold text-gray-800">Owner Type</h3>
                     <div className="mt-2 flex flex-wrap gap-3">
                         <label className="flex items-center space-x-2 text-sm">
@@ -166,6 +217,16 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
                             )}
                         />
                     </div>
+                </div>
+
+                <div>
+                    <h3 className="text-sm font-semibold text-gray-800">Sort By</h3>
+                    <select {...register("sortBy")} className="mt-2 w-full text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-red-400 focus:border-transparent">
+                        <option value="distance">Nearest</option>
+                        <option value="price_asc">Price: Low to High</option>
+                        <option value="price_desc">Price: High to Low</option>
+                        <option value="newest">Newest First</option>
+                    </select>
                 </div>
 
                 <button

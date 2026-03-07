@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (ownerType) {
-      conditions.push(`u."role" = $${paramIndex}::"Role"`);
+      conditions.push(`u."ownerType" = $${paramIndex}::"OwnerType"`);
       values.push(ownerType);
       paramIndex++;
     }
@@ -50,10 +50,11 @@ export async function GET(request: NextRequest) {
     values.push(limit);
 
     const sql = `
-      SELECT l."id", l."title", l."rent", l."propertyType", l."address", l."images",
+      SELECT l."id", l."title", l."rent", l."deposit", l."propertyType", l."furnishing",
+             l."bedrooms", l."bathrooms", l."area", l."amenities", l."address", l."images",
              ST_X(l."location"::geometry) as longitude,
              ST_Y(l."location"::geometry) as latitude,
-             u."name" as "ownerName", u."role" as "ownerType"
+             u."name" as "ownerName", u."ownerType" as "ownerType"
       FROM listings l
       JOIN users u ON l."userId" = u."id"
       WHERE ${conditions.join(" AND ")}

@@ -14,6 +14,17 @@ const propertyTypeLabel: Record<string, string> = {
     SHARED: "Shared Room",
 };
 
+const furnishingLabel: Record<string, string> = {
+    FURNISHED: "Furnished",
+    SEMI_FURNISHED: "Semi-Furnished",
+    UNFURNISHED: "Unfurnished",
+};
+
+const ownerTypeLabel: Record<string, string> = {
+    INDIVIDUAL: "Owner",
+    BROKER: "Broker",
+};
+
 export default function ListingDetailPanel({ listingId, onClose }: ListingDetailProps) {
     const [detail, setDetail] = useState<ListingDetailType | null>(null);
     const [loading, setLoading] = useState(false);
@@ -96,27 +107,73 @@ export default function ListingDetailPanel({ listingId, onClose }: ListingDetail
                         <div>
                             <div className="flex items-start justify-between gap-3">
                                 <h2 className="text-base font-bold text-gray-900 leading-tight">{detail.title}</h2>
-                                <span className="shrink-0 text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                                    {propertyTypeLabel[detail.propertyType] || detail.propertyType}
-                                </span>
+                                <div className="flex gap-1.5 shrink-0">
+                                    <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                                        {propertyTypeLabel[detail.propertyType] || detail.propertyType}
+                                    </span>
+                                    <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                                        {furnishingLabel[detail.furnishing] || detail.furnishing}
+                                    </span>
+                                </div>
                             </div>
                             <p className="text-xs text-gray-500 mt-1">{detail.address}</p>
                         </div>
 
-                        <div className="text-lg font-bold text-[#f75c5f]">
-                            ₹{detail.rent.toLocaleString("en-IN")}
-                            <span className="text-sm font-normal text-gray-500">/mo</span>
+                        {/* Price */}
+                        <div>
+                            <div className="text-lg font-bold text-[#f75c5f]">
+                                ₹{detail.rent.toLocaleString("en-IN")}
+                                <span className="text-sm font-normal text-gray-500">/mo</span>
+                            </div>
+                            {(detail.deposit || detail.maintenance) && (
+                                <div className="mt-1 flex gap-3 text-xs text-gray-500">
+                                    {detail.deposit && <span>Deposit: ₹{detail.deposit.toLocaleString("en-IN")}</span>}
+                                    {detail.maintenance && <span>Maintenance: ₹{detail.maintenance.toLocaleString("en-IN")}/mo</span>}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Quick stats */}
+                        <div className="flex flex-wrap gap-3 text-sm text-gray-700">
+                            {detail.bedrooms && <span>{detail.bedrooms} BHK</span>}
+                            {detail.bathrooms && <span>{detail.bathrooms} Bath</span>}
+                            {detail.area && <span>{detail.area} sq ft</span>}
+                            {detail.floor != null && detail.totalFloors && (
+                                <span>{detail.floor === 0 ? "Ground" : `Floor ${detail.floor}`} of {detail.totalFloors}</span>
+                            )}
                         </div>
 
                         {detail.description && (
                             <p className="text-sm text-gray-700 leading-relaxed">{detail.description}</p>
                         )}
 
+                        {/* Amenities */}
+                        {detail.amenities?.length > 0 && (
+                            <div>
+                                <h3 className="text-xs font-semibold text-gray-800 uppercase tracking-wide mb-2">Amenities</h3>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {detail.amenities.map(a => (
+                                        <span key={a} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                            {a}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Available from */}
+                        {detail.availableFrom && (
+                            <div className="text-xs text-gray-500">
+                                Available from {new Date(detail.availableFrom).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                            </div>
+                        )}
+
+                        {/* Contact */}
                         <div className="p-3 bg-gray-50 rounded-lg">
                             <h3 className="text-xs font-semibold text-gray-800 uppercase tracking-wide">Contact</h3>
                             <div className="mt-1.5 flex items-center gap-3 text-sm text-gray-600">
                                 <span>{detail.ownerName}</span>
-                                <span className="text-xs bg-gray-200 px-1.5 py-0.5 rounded">{detail.ownerType}</span>
+                                <span className="text-xs bg-gray-200 px-1.5 py-0.5 rounded">{ownerTypeLabel[detail.ownerType] || detail.ownerType}</span>
                             </div>
                             {detail.ownerPhone && (
                                 <a href={`tel:${detail.ownerPhone}`} className="mt-1.5 block text-sm text-[#f75c5f] font-medium hover:underline">

@@ -20,7 +20,10 @@ function SearchContent() {
         lng: Number(searchParams.get("lng")) || 0,
         location: searchParams.get("location") || "",
         propertyType: searchParams.get("propertyType")?.split(",").filter(Boolean) || [],
-        ownerType: searchParams.get("ownerType")?.split(",").filter(Boolean) || ["OWNER", "BROKER"],
+        ownerType: searchParams.get("ownerType")?.split(",").filter(Boolean) || ["INDIVIDUAL", "BROKER"],
+        furnishing: searchParams.get("furnishing")?.split(",").filter(Boolean) || [],
+        bedrooms: searchParams.get("bedrooms") ? Number(searchParams.get("bedrooms")) : null,
+        sortBy: searchParams.get("sortBy") || "distance",
         minRent: Number(searchParams.get("minRent")) || 5000,
         maxRent: Number(searchParams.get("maxRent")) || 50000,
     };
@@ -33,6 +36,9 @@ function SearchContent() {
 
         if (f.propertyType.length === 1) params.set("propertyType", f.propertyType[0]);
         if (f.ownerType.length === 1) params.set("ownerType", f.ownerType[0]);
+        if (f.furnishing.length === 1) params.set("furnishing", f.furnishing[0]);
+        if (f.bedrooms) params.set("bedrooms", String(f.bedrooms));
+        if (f.sortBy) params.set("sortBy", f.sortBy);
         params.set("minRent", String(f.minRent));
         params.set("maxRent", String(f.maxRent));
 
@@ -68,6 +74,9 @@ function SearchContent() {
         params.set("location", newFilters.location);
         if (newFilters.propertyType.length) params.set("propertyType", newFilters.propertyType.join(","));
         if (newFilters.ownerType.length) params.set("ownerType", newFilters.ownerType.join(","));
+        if (newFilters.furnishing.length) params.set("furnishing", newFilters.furnishing.join(","));
+        if (newFilters.bedrooms) params.set("bedrooms", String(newFilters.bedrooms));
+        if (newFilters.sortBy) params.set("sortBy", newFilters.sortBy);
         params.set("minRent", String(newFilters.minRent));
         params.set("maxRent", String(newFilters.maxRent));
 

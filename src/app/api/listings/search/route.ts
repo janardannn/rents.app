@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { longitude, latitude, radius, propertyType, minRent, maxRent, ownerType, limit, offset } = parsed.data;
+    const { longitude, latitude, radius, propertyType, minRent, maxRent, ownerType, furnishing, bedrooms, sortBy, limit, offset } = parsed.data;
     const prisma = await getPrisma();
 
     const conditions: string[] = [
@@ -42,23 +42,43 @@ export async function GET(request: NextRequest) {
     }
 
     if (ownerType) {
-      conditions.push(`u."role" = $${paramIndex}::"Role"`);
+      conditions.push(`u."ownerType" = $${paramIndex}::"OwnerType"`);
       values.push(ownerType);
       paramIndex++;
     }
 
+    if (furnishing) {
+      conditions.push(`l."furnishing" = $${paramIndex}::"FurnishingStatus"`);
+      values.push(furnishing);
+      paramIndex++;
+    }
+
+    if (bedrooms) {
+      conditions.push(`l."bedrooms" = $${paramIndex}`);
+      values.push(bedrooms);
+      paramIndex++;
+    }
+
+    const orderClause = {
+      distance: "distance ASC",
+      price_asc: `l."rent" ASC`,
+      price_desc: `l."rent" DESC`,
+      newest: `l."createdAt" DESC`,
+    }[sortBy];
+
     values.push(limit, offset);
 
     const sql = `
-      SELECT l."id", l."title", l."rent", l."propertyType", l."address", l."images",
+      SELECT l."id", l."title", l."rent", l."deposit", l."propertyType", l."furnishing",
+             l."bedrooms", l."bathrooms", l."area", l."amenities", l."address", l."images",
              ST_X(l."location"::geometry) as longitude,
              ST_Y(l."location"::geometry) as latitude,
              ST_Distance(l."location", ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography) as distance,
-             u."name" as "ownerName", u."role" as "ownerType"
+             u."name" as "ownerName", u."ownerType" as "ownerType"
       FROM listings l
       JOIN users u ON l."userId" = u."id"
       WHERE ${conditions.join(" AND ")}
-      ORDER BY distance ASC
+      ORDER BY ${orderClause}
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 

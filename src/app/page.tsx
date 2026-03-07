@@ -25,7 +25,7 @@ export default function HomePage() {
     if (types.length) params.set("propertyType", types.join(","));
 
     const owners: string[] = [];
-    if (data.ownerType.owner) owners.push("OWNER");
+    if (data.ownerType.owner) owners.push("INDIVIDUAL");
     if (data.ownerType.broker) owners.push("BROKER");
     if (owners.length) params.set("ownerType", owners.join(","));
 
