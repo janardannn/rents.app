@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import MapComponent from "@/components/map/map";
 import SearchSidebar, { type SearchFilters } from "@/components/search-sidebar/search-sidebar";
 import ListingDetailPanel from "@/components/listing-detail/listing-detail";
@@ -17,6 +17,7 @@ function SearchContent() {
     const [selectedListingId, setSelectedListingId] = useState<string | null>(
         searchParams.get("listing")
     );
+    const isFirstLoad = useRef(true);
 
     const filters: SearchFilters = {
         lat: Number(searchParams.get("lat")) || 0,
@@ -58,8 +59,9 @@ function SearchContent() {
         if (filters.lat && filters.lng) {
             // Don't override if we're opening a shared listing — onLoaded will handle flyTo
             if (!searchParams.get("listing")) {
-                setFlyTo({ lng: filters.lng, lat: filters.lat, _t: Date.now() });
+                setFlyTo({ lng: filters.lng, lat: filters.lat, zoom: isFirstLoad.current ? 12 : undefined, _t: Date.now() });
             }
+            isFirstLoad.current = false;
             fetchListings(filters);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,7 +110,8 @@ function SearchContent() {
                     listingId={selectedListingId}
                     onClose={() => setSelectedListingId(null)}
                     onLoaded={(detail: ListingDetail) => {
-                        if (detail.longitude && detail.latitude) {
+                        // Only fly+zoom for shared URLs (initial load with listing param)
+                        if (isFirstLoad.current && detail.longitude && detail.latitude) {
                             setFlyTo({ lng: detail.longitude, lat: detail.latitude, zoom: 15, _t: Date.now() });
                         }
                     }}

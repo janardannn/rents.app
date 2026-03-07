@@ -263,12 +263,13 @@ export default function MapboxMap({ listings = [], flyTo, onListingClick, select
         if (!sourceReady.current) {
             // Map hasn't loaded yet — defer
             map.once("load", () => {
-                map.flyTo({
+                const opts: mapboxgl.FlyToOptions = {
                     center: [flyTo.lng, flyTo.lat],
-                    zoom: flyTo.zoom ?? 12,
                     pitch: view === "3D" ? 72 : 0,
                     duration: 1500,
-                });
+                };
+                if (flyTo.zoom != null) opts.zoom = flyTo.zoom;
+                map.flyTo(opts);
             });
             return;
         }
@@ -279,13 +280,15 @@ export default function MapboxMap({ listings = [], flyTo, onListingClick, select
         const panelWidth = containerWidth * 0.45;
         const offsetX = hasPanel ? panelWidth / 2 : 0;
 
-        map.flyTo({
+        const opts: mapboxgl.FlyToOptions = {
             center: [flyTo.lng, flyTo.lat],
-            zoom: flyTo.zoom ?? map.getZoom(),
             pitch: view === "3D" ? 72 : 0,
             duration: 1500,
             offset: [-offsetX, 0],
-        });
+        };
+        if (flyTo.zoom != null) opts.zoom = flyTo.zoom;
+
+        map.flyTo(opts);
     }, [flyTo, view]);
 
     useEffect(() => {
