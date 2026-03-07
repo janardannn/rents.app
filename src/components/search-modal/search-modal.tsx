@@ -30,11 +30,14 @@ const SearchModal = ({ onApplyFilters }: SearchModalProps) => {
             location: "",
             placeDetails: null,
             propertyType: {
-                pg: false,
-                flat: false,
-                shared: false,
+                pg: true,
+                flat: true,
+                shared: true,
             },
-            ownerType: "any",
+            ownerType: {
+                owner: true,
+                broker: true,
+            },
             budget: [5000, 50000],
         },
     });
@@ -43,10 +46,14 @@ const SearchModal = ({ onApplyFilters }: SearchModalProps) => {
 
     const onSubmit = (data: SearchModalType) => {
         setApplied(true);
+        const types = (Object.keys(data.propertyType) as Array<keyof typeof data.propertyType>)
+            .filter((key) => data.propertyType[key])
+            .join(", ");
+        const owners = (Object.keys(data.ownerType) as Array<keyof typeof data.ownerType>)
+            .filter((key) => data.ownerType[key])
+            .join(", ");
         setDisplayText(
-            `${(Object.keys(data.propertyType) as Array<keyof typeof data.propertyType>)
-                .filter((key) => data.propertyType[key])
-                .join(", ")} in ${data.location} with budget ₹${data.budget[0]} - ₹${data.budget[1]}`
+            `${types} in ${data.location}${owners ? ` · ${owners}` : ""} · ₹${data.budget[0]} - ₹${data.budget[1]}`
         );
         setIsOpen(false);
         onApplyFilters?.(data);
@@ -124,15 +131,11 @@ const SearchModal = ({ onApplyFilters }: SearchModalProps) => {
                                     <h3 className="font-semibold text-gray-800">Owner Type</h3>
                                     <div className="mt-2 flex flex-wrap gap-4">
                                         <label className="flex items-center space-x-2">
-                                            <input {...register("ownerType")} type="radio" value="any" className="h-4 w-4 border-gray-300 text-red-500 focus:ring-red-400" />
-                                            <span>Any</span>
-                                        </label>
-                                        <label className="flex items-center space-x-2">
-                                            <input {...register("ownerType")} type="radio" value="owner" className="h-4 w-4 border-gray-300 text-red-500 focus:ring-red-400" />
+                                            <input type="checkbox" {...register("ownerType.owner")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
                                             <span>Owner</span>
                                         </label>
                                         <label className="flex items-center space-x-2">
-                                            <input {...register("ownerType")} type="radio" value="broker" className="h-4 w-4 border-gray-300 text-red-500 focus:ring-red-400" />
+                                            <input type="checkbox" {...register("ownerType.broker")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
                                             <span>Broker</span>
                                         </label>
                                     </div>

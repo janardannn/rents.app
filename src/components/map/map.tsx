@@ -1,24 +1,23 @@
 "use client";
 
 import MapboxMap from "./mapbox";
-import { useUserLocation } from "@/hooks/use-user-location";
 import type { ListingResult } from "@/types/listing";
 
 interface MapComponentProps {
     listings?: ListingResult[];
     flyTo?: { lng: number; lat: number } | null;
+    onListingClick?: (listingId: string) => void;
+    showViewToggle?: boolean;
 }
 
-const MapComponent = ({ listings = [], flyTo }: MapComponentProps) => {
-    const userLocation = useUserLocation();
-
+const MapComponent = ({ listings = [], flyTo, onListingClick, showViewToggle = false }: MapComponentProps) => {
     return (
-        <div>
+        <div className="w-full h-full">
             <MapboxMap
-                latitude={userLocation.latitude}
-                longitude={userLocation.longitude}
                 listings={listings}
                 flyTo={flyTo}
+                onListingClick={onListingClick}
+                showViewToggle={showViewToggle}
             />
         </div>
     );

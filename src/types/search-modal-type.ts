@@ -19,6 +19,9 @@ export interface SearchModalType {
         flat: boolean;
         shared: boolean;
     };
-    ownerType: 'any' | 'owner' | 'broker';
+    ownerType: {
+        owner: boolean;
+        broker: boolean;
+    };
     budget: [number, number];
 }
