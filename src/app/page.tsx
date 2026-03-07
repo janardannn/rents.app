@@ -4,6 +4,7 @@ import Logo from "@/components/logo";
 import MapComponent from "@/components/map/map";
 import SearchButton from "@/components/search-modal/search-button";
 import SearchModal from "@/components/search-modal/search-modal";
+import UserMenu from "@/components/user-menu";
 import type { SearchModalType } from "@/types/search-modal-type";
 import { useRouter } from "next/navigation";
 
@@ -43,6 +44,8 @@ export default function HomePage() {
         </div>
 
         <div className="absolute inset-0 bg-black/41 bg-[radial-gradient(ellipse_at_center,_rgba(0,0,0,0.88)_0%,_rgba(0,0,0,0.60)_22%,_transparent_80%)] pointer-events-none" />
+
+        <UserMenu variant="floating" />
 
         <div className="relative z-10 flex flex-col justify-center items-center h-full pointer-events-none">
           <div className="pointer-events-none">

@@ -4,6 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import * as Slider from "@radix-ui/react-slider";
 import Logo from "@/components/logo";
 import ListingCard from "@/components/listing-card/listing-card";
+import UserMenu from "@/components/user-menu";
 import type { ListingResult } from "@/types/listing";
 
 import dynamic from "next/dynamic";
@@ -102,8 +103,9 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
 
     return (
         <div className="h-full flex flex-col bg-white">
-            <div className="px-4 py-3 border-b border-gray-100 shrink-0">
+            <div className="px-4 py-3 border-b border-gray-100 shrink-0 flex items-center justify-between">
                 <Logo height={100} width={100} />
+                <UserMenu variant="inline" />
             </div>
 
             <div className="flex-1 overflow-y-auto">
