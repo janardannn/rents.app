@@ -20,7 +20,7 @@ export default function RegisterPage() {
             name: formData.get("name") as string,
             email: formData.get("email") as string,
             password: formData.get("password") as string,
-            phone: (formData.get("phone") as string) || undefined,
+            phone: formData.get("phone") as string,
         };
 
         try {
@@ -87,11 +87,12 @@ export default function RegisterPage() {
                             />
                         </div>
                         <div>
-                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone <span className="text-gray-400">(optional)</span></label>
+                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                             <input
                                 id="phone"
                                 name="phone"
                                 type="tel"
+                                required
                                 className="w-full px-3 py-2.5 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f75c5f] focus:border-transparent outline-none"
                                 placeholder="9876543210"
                             />
@@ -103,9 +104,9 @@ export default function RegisterPage() {
                                 name="password"
                                 type="password"
                                 required
-                                minLength={6}
+                                minLength={8}
                                 className="w-full px-3 py-2.5 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f75c5f] focus:border-transparent outline-none"
-                                placeholder="Min 6 characters"
+                                placeholder="Min 8 characters"
                             />
                         </div>
                         <button
