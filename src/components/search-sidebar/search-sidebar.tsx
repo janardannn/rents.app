@@ -109,7 +109,7 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
             <div className="flex-1 overflow-y-auto">
             <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-6">
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-800">Location</h3>
+                    <h3 className="text-base font-semibold text-gray-800">Location</h3>
                     <div className="mt-2">
                         <SearchBox
                             accessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN as string}
@@ -128,17 +128,17 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
                 </div>
 
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-800">Property Type</h3>
+                    <h3 className="text-base font-semibold text-gray-800">Property Type</h3>
                     <div className="mt-2 flex flex-wrap gap-3">
-                        <label className="flex items-center space-x-2 text-sm">
+                        <label className="flex items-center space-x-2 text-base">
                             <input type="checkbox" {...register("pg")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
                             <span>PG</span>
                         </label>
-                        <label className="flex items-center space-x-2 text-sm">
+                        <label className="flex items-center space-x-2 text-base">
                             <input type="checkbox" {...register("flat")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
                             <span>Flat</span>
                         </label>
-                        <label className="flex items-center space-x-2 text-sm">
+                        <label className="flex items-center space-x-2 text-base">
                             <input type="checkbox" {...register("shared")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
                             <span>Shared Room</span>
                         </label>
@@ -146,17 +146,17 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
                 </div>
 
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-800">Furnishing</h3>
+                    <h3 className="text-base font-semibold text-gray-800">Furnishing</h3>
                     <div className="mt-2 flex flex-wrap gap-3">
-                        <label className="flex items-center space-x-2 text-sm">
+                        <label className="flex items-center space-x-2 text-base">
                             <input type="checkbox" {...register("furnished")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
                             <span>Furnished</span>
                         </label>
-                        <label className="flex items-center space-x-2 text-sm">
+                        <label className="flex items-center space-x-2 text-base">
                             <input type="checkbox" {...register("semiFurnished")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
                             <span>Semi</span>
                         </label>
-                        <label className="flex items-center space-x-2 text-sm">
+                        <label className="flex items-center space-x-2 text-base">
                             <input type="checkbox" {...register("unfurnished")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
                             <span>Unfurnished</span>
                         </label>
@@ -164,8 +164,8 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
                 </div>
 
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-800">BHK</h3>
-                    <select {...register("bedrooms")} className="mt-2 w-full text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-red-400 focus:border-transparent">
+                    <h3 className="text-base font-semibold text-gray-800">BHK</h3>
+                    <select {...register("bedrooms")} className="mt-2 w-full text-base border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-red-400 focus:border-transparent">
                         <option value="">Any</option>
                         <option value="1">1 BHK</option>
                         <option value="2">2 BHK</option>
@@ -176,13 +176,13 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
                 </div>
 
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-800">Owner Type</h3>
+                    <h3 className="text-base font-semibold text-gray-800">Owner Type</h3>
                     <div className="mt-2 flex flex-wrap gap-3">
-                        <label className="flex items-center space-x-2 text-sm">
+                        <label className="flex items-center space-x-2 text-base">
                             <input type="checkbox" {...register("ownerOwner")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
                             <span>Owner</span>
                         </label>
-                        <label className="flex items-center space-x-2 text-sm">
+                        <label className="flex items-center space-x-2 text-base">
                             <input type="checkbox" {...register("ownerBroker")} className="h-4 w-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
                             <span>Broker</span>
                         </label>
@@ -191,8 +191,8 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
 
                 <div>
                     <div className="flex justify-between items-center">
-                        <h3 className="text-sm font-semibold text-gray-800">Budget Range</h3>
-                        <span className="text-sm font-medium text-gray-900">
+                        <h3 className="text-base font-semibold text-gray-800">Budget Range</h3>
+                        <span className="text-base font-medium text-gray-900">
                             ₹{budgetValues[0]} - ₹{budgetValues[1]}
                         </span>
                     </div>
@@ -221,8 +221,8 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
                 </div>
 
                 <div>
-                    <h3 className="text-sm font-semibold text-gray-800">Sort By</h3>
-                    <select {...register("sortBy")} className="mt-2 w-full text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-red-400 focus:border-transparent">
+                    <h3 className="text-base font-semibold text-gray-800">Sort By</h3>
+                    <select {...register("sortBy")} className="mt-2 w-full text-base border border-gray-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-red-400 focus:border-transparent">
                         <option value="distance">Nearest</option>
                         <option value="price_asc">Price: Low to High</option>
                         <option value="price_desc">Price: High to Low</option>
@@ -232,7 +232,7 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
 
                 <button
                     type="submit"
-                    className="w-full py-2.5 text-sm font-medium text-white bg-[#f75c5f] rounded-lg hover:bg-[#e05558] transition-colors cursor-pointer"
+                    className="w-full py-2.5 text-base font-medium text-white bg-[#f75c5f] rounded-lg hover:bg-[#e05558] transition-colors cursor-pointer"
                 >
                     Update Search
                 </button>
@@ -241,7 +241,7 @@ export default function SearchSidebar({ initialFilters, onFiltersChange, listing
             {listings.length > 0 && (
                 <div className="border-t border-gray-100">
                     <div className="p-4 pb-1">
-                        <h3 className="text-sm font-semibold text-gray-800">{listings.length} Properties Found</h3>
+                        <h3 className="text-lg font-semibold text-gray-800">{listings.length} Properties Found</h3>
                     </div>
                     <div className="px-4 pb-4 space-y-2">
                         {listings.map(listing => (

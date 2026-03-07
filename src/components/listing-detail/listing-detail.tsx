@@ -43,13 +43,17 @@ function ChevronRight({ className = "w-5 h-5" }: { className?: string }) {
     );
 }
 
-function StatItem({ value, label }: { value: string; label: string }) {
-    return (
-        <div>
-            <div className="text-lg font-semibold text-gray-900">{value}</div>
-            <div className="text-xs text-gray-500">{label}</div>
-        </div>
-    );
+function daysAgo(dateStr: string): string {
+    const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+    if (diff === 0) return "Today";
+    if (diff === 1) return "Yesterday";
+    if (diff < 30) return `${diff}d ago`;
+    const months = Math.floor(diff / 30);
+    return months === 1 ? "1 month ago" : `${months} months ago`;
+}
+
+function Divider() {
+    return <div className="mx-4 my-3 border-t border-gray-100" />;
 }
 
 export default function ListingDetailPanel({ listingId, onClose, onLoaded }: ListingDetailProps) {
@@ -98,6 +102,8 @@ export default function ListingDetailPanel({ listingId, onClose, onLoaded }: Lis
         return () => window.removeEventListener("keydown", handler);
     }, [lightbox, images.length]);
 
+    const totalMonthly = detail ? detail.rent + (detail.maintenance || 0) : 0;
+
     return (
         <div
             className={`absolute top-4 right-4 bottom-4 w-[45%] min-w-[480px] max-w-[800px] bg-white/95 backdrop-blur-md rounded-2xl z-40 flex flex-col transition-all duration-300 ${isOpen ? "translate-x-0 opacity-100" : "translate-x-[calc(100%+16px)] opacity-0"}`}
@@ -111,191 +117,330 @@ export default function ListingDetailPanel({ listingId, onClose, onLoaded }: Lis
                 <>
                     {/* Scrollable content */}
                     <div className="flex-1 overflow-y-auto rounded-t-2xl">
-                        {/* Image with overlay */}
-                        <div className="relative shrink-0">
+                        {/* Image */}
+                        <div className="relative">
                             {images.length > 0 ? (
                                 <>
                                     <img
                                         src={images[imageIndex]}
                                         alt={detail.title}
                                         onClick={() => setLightbox(true)}
-                                        className="w-full h-64 object-cover rounded-t-2xl cursor-pointer"
+                                        className="w-full h-56 object-cover rounded-t-2xl cursor-pointer"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-t-2xl pointer-events-none" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 rounded-t-2xl pointer-events-none" />
 
                                     {images.length > 1 && (
                                         <>
                                             <button
                                                 onClick={() => setImageIndex(i => (i - 1 + images.length) % images.length)}
-                                                className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white rounded-full w-9 h-9 flex items-center justify-center cursor-pointer transition-colors"
+                                                className="absolute left-2.5 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer transition-colors"
                                             >
-                                                <ChevronLeft className="w-5 h-5" />
+                                                <ChevronLeft className="w-3.5 h-3.5" />
                                             </button>
                                             <button
                                                 onClick={() => setImageIndex(i => (i + 1) % images.length)}
-                                                className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white rounded-full w-9 h-9 flex items-center justify-center cursor-pointer transition-colors"
+                                                className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer transition-colors"
                                             >
-                                                <ChevronRight className="w-5 h-5" />
+                                                <ChevronRight className="w-3.5 h-3.5" />
                                             </button>
-                                            <div className="absolute bottom-14 left-1/2 -translate-x-1/2 flex gap-1.5">
+                                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-1">
                                                 {images.map((_, i) => (
                                                     <button
                                                         key={i}
                                                         onClick={() => setImageIndex(i)}
-                                                        className={`w-2 h-2 rounded-full transition-all cursor-pointer ${i === imageIndex ? "bg-white scale-110" : "bg-white/50"}`}
+                                                        className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${i === imageIndex ? "bg-white w-3.5" : "bg-white/40"}`}
                                                     />
                                                 ))}
                                             </div>
                                         </>
                                     )}
 
-                                    {/* Title + price on image */}
-                                    <div className="absolute bottom-0 left-0 right-0 px-5 pb-3">
-                                        <div className="flex items-end justify-between gap-3">
-                                            <div className="min-w-0">
-                                                <h2 className="text-lg font-bold text-white leading-snug drop-shadow-sm truncate">{detail.title}</h2>
-                                                <p className="text-sm text-white/80 mt-0.5 truncate">{detail.address}</p>
-                                            </div>
-                                            <div className="shrink-0 text-right">
-                                                <div className="text-xl font-bold text-white drop-shadow-sm">
-                                                    ₹{detail.rent.toLocaleString("en-IN")}
-                                                </div>
-                                                <div className="text-xs text-white/70">per month</div>
-                                            </div>
-                                        </div>
+                                    {/* Title overlay on image bottom */}
+                                    <div className="absolute bottom-0 left-0 right-0 px-4 pb-2.5">
+                                        <h2 className="text-lg font-bold text-white leading-tight drop-shadow-sm truncate">{detail.title}</h2>
+                                        <p className="text-sm text-white/75 mt-0.5 truncate">{detail.address}</p>
+                                    </div>
+
+                                    {/* Share + Close */}
+                                    <div className="absolute top-2.5 right-2.5 flex gap-1.5 z-10">
+                                        <button
+                                            onClick={handleShare}
+                                            className="bg-black/35 hover:bg-black/55 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center text-white cursor-pointer transition-colors"
+                                            title="Copy link"
+                                        >
+                                            {copied ? (
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            ) : (
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                                </svg>
+                                            )}
+                                        </button>
+                                        <button
+                                            onClick={onClose}
+                                            className="bg-black/35 hover:bg-black/55 backdrop-blur-sm rounded-full w-7 h-7 flex items-center justify-center text-white cursor-pointer transition-colors"
+                                        >
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </>
                             ) : (
-                                <div className="w-full h-36 bg-gray-100 rounded-t-2xl flex items-center justify-center text-gray-400 text-sm">
+                                <div className="w-full h-28 bg-gray-50 rounded-t-2xl flex items-center justify-center text-gray-300 text-sm relative">
                                     No images
+                                    <div className="absolute top-2.5 right-2.5 flex gap-1.5">
+                                        <button onClick={handleShare} className="bg-gray-200 hover:bg-gray-300 rounded-full w-7 h-7 flex items-center justify-center text-gray-500 cursor-pointer transition-colors" title="Copy link">
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                                        </button>
+                                        <button onClick={onClose} className="bg-gray-200 hover:bg-gray-300 rounded-full w-7 h-7 flex items-center justify-center text-gray-500 cursor-pointer transition-colors">
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </button>
+                                    </div>
                                 </div>
                             )}
+                        </div>
 
-                            <div className="absolute top-3 right-3 flex gap-2 z-10">
-                                <button
-                                    onClick={handleShare}
-                                    className="bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center text-white cursor-pointer transition-colors"
-                                    title="Copy link"
-                                >
-                                    {copied ? (
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    ) : (
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                        </svg>
-                                    )}
-                                </button>
-                                <button
-                                    onClick={onClose}
-                                    className="bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full w-8 h-8 flex items-center justify-center text-white text-lg cursor-pointer transition-colors"
-                                >
-                                    &#x2715;
-                                </button>
+                        {/* Price row + badges */}
+                        <div className="px-4 pt-3 flex items-center justify-between">
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-bold text-gray-900">₹{detail.rent.toLocaleString("en-IN")}</span>
+                                <span className="text-sm text-gray-400">/mo</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-medium bg-[#f75c5f]/10 text-[#f75c5f] px-2 py-0.5 rounded-full">
+                                    {propertyTypeLabel[detail.propertyType] || detail.propertyType}
+                                </span>
+                                <span className="text-xs text-gray-400">{daysAgo(detail.createdAt)}</span>
                             </div>
                         </div>
 
-                        {/* Badges */}
-                        <div className="px-5 pt-3 flex gap-2">
-                            <span className="text-xs font-medium bg-[#f75c5f]/10 text-[#f75c5f] px-2.5 py-1 rounded-full">
-                                {propertyTypeLabel[detail.propertyType] || detail.propertyType}
-                            </span>
-                            <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">
-                                {furnishingLabel[detail.furnishing] || detail.furnishing}
-                            </span>
-                            {detail.availableFrom && (
-                                <span className="text-xs font-medium bg-green-50 text-green-700 px-2.5 py-1 rounded-full">
-                                    Avail. {new Date(detail.availableFrom).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-                                </span>
+                        {/* Key specs — compact grid */}
+                        <div className="px-4 pt-2.5 grid grid-cols-5 gap-1">
+                            {detail.bedrooms && (
+                                <div className="bg-gray-50 rounded-lg py-1.5 text-center">
+                                    <div className="text-base font-semibold text-gray-900">{detail.bedrooms}</div>
+                                    <div className="text-xs text-gray-400">Beds</div>
+                                </div>
+                            )}
+                            {detail.bathrooms && (
+                                <div className="bg-gray-50 rounded-lg py-1.5 text-center">
+                                    <div className="text-base font-semibold text-gray-900">{detail.bathrooms}</div>
+                                    <div className="text-xs text-gray-400">Baths</div>
+                                </div>
+                            )}
+                            {detail.area && (
+                                <div className="bg-gray-50 rounded-lg py-1.5 text-center">
+                                    <div className="text-base font-semibold text-gray-900">{detail.area}</div>
+                                    <div className="text-xs text-gray-400">Sq ft</div>
+                                </div>
+                            )}
+                            {detail.floor != null && detail.totalFloors && (
+                                <div className="bg-gray-50 rounded-lg py-1.5 text-center">
+                                    <div className="text-base font-semibold text-gray-900">{detail.floor === 0 ? "G" : detail.floor}/{detail.totalFloors}</div>
+                                    <div className="text-xs text-gray-400">Floor</div>
+                                </div>
+                            )}
+                            {detail.furnishing && (
+                                <div className="bg-gray-50 rounded-lg py-1.5 text-center">
+                                    <div className="text-base font-semibold text-gray-900">{detail.furnishing === "SEMI_FURNISHED" ? "Semi" : detail.furnishing === "FURNISHED" ? "Yes" : "No"}</div>
+                                    <div className="text-xs text-gray-400">Furnished</div>
+                                </div>
                             )}
                         </div>
 
-                        {/* Stats */}
-                        {(detail.bedrooms || detail.bathrooms || detail.area || detail.floor != null) && (
-                            <div className="px-5 pt-4 flex gap-6">
-                                {detail.bedrooms && <StatItem value={`${detail.bedrooms}`} label="Bedrooms" />}
-                                {detail.bathrooms && <StatItem value={`${detail.bathrooms}`} label="Bathrooms" />}
-                                {detail.area && <StatItem value={`${detail.area}`} label="Sq Ft" />}
-                                {detail.floor != null && detail.totalFloors && (
-                                    <StatItem value={detail.floor === 0 ? `G/${detail.totalFloors}` : `${detail.floor}/${detail.totalFloors}`} label="Floor" />
+                        <Divider />
+
+                        {/* Pricing breakdown — always show */}
+                        <div className="px-4">
+                            <h3 className="text-base font-semibold text-gray-900 uppercase tracking-wide mb-2">Pricing</h3>
+                            <div className="space-y-1.5 text-base">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Rent</span>
+                                    <span className="text-gray-900 font-medium">₹{detail.rent.toLocaleString("en-IN")}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Security Deposit</span>
+                                    <span className="text-gray-900 font-medium">{detail.deposit ? `₹${detail.deposit.toLocaleString("en-IN")}` : "—"}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-500">Maintenance</span>
+                                    <span className="text-gray-900 font-medium">{detail.maintenance ? `₹${detail.maintenance.toLocaleString("en-IN")}/mo` : "—"}</span>
+                                </div>
+                                {detail.maintenance && (
+                                    <>
+                                        <div className="border-t border-dashed border-gray-200" />
+                                        <div className="flex justify-between font-semibold">
+                                            <span className="text-gray-700">Total Monthly</span>
+                                            <span className="text-gray-900">₹{totalMonthly.toLocaleString("en-IN")}</span>
+                                        </div>
+                                    </>
                                 )}
                             </div>
-                        )}
+                        </div>
 
-                        {/* Cost breakdown */}
-                        {(detail.deposit || detail.maintenance) && (
-                            <div className="px-5 pt-4">
-                                <div className="grid grid-cols-3 gap-px bg-gray-200 rounded-lg overflow-hidden">
-                                    <div className="bg-white px-3 py-2.5">
-                                        <div className="text-xs text-gray-500">Rent</div>
-                                        <div className="text-sm font-semibold text-gray-900 mt-0.5">₹{detail.rent.toLocaleString("en-IN")}</div>
-                                    </div>
-                                    <div className="bg-white px-3 py-2.5">
-                                        <div className="text-xs text-gray-500">Deposit</div>
-                                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
-                                            {detail.deposit ? `₹${detail.deposit.toLocaleString("en-IN")}` : "—"}
-                                        </div>
-                                    </div>
-                                    <div className="bg-white px-3 py-2.5">
-                                        <div className="text-xs text-gray-500">Maintenance</div>
-                                        <div className="text-sm font-semibold text-gray-900 mt-0.5">
-                                            {detail.maintenance ? `₹${detail.maintenance.toLocaleString("en-IN")}` : "—"}
-                                        </div>
-                                    </div>
-                                </div>
+                        {/* Available from */}
+                        {detail.availableFrom && (
+                            <div className="px-4 mt-2.5 flex items-center gap-1.5 text-sm">
+                                <svg className="w-3.5 h-3.5 text-green-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                </svg>
+                                <span className="text-gray-500">Available</span>
+                                <span className="text-gray-900 font-medium">
+                                    {new Date(detail.availableFrom).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                                </span>
                             </div>
                         )}
+
+                        <Divider />
+
+                        {/* Rent Analysis — placeholder */}
+                        <div className="px-4">
+                            <h3 className="text-base font-semibold text-gray-900 uppercase tracking-wide mb-2">Rent Analysis</h3>
+                            <div className="bg-gray-50 rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs text-gray-500">Area average for {detail.bedrooms || 1}BHK</span>
+                                    <span className="text-xs font-semibold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">Fair Price</span>
+                                </div>
+                                <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div className="absolute inset-y-0 left-[15%] right-[15%] bg-gradient-to-r from-green-300 via-green-400 to-yellow-300 rounded-full" />
+                                    <div className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-2 border-[#f75c5f] rounded-full" style={{ left: "45%" }} />
+                                </div>
+                                <div className="flex justify-between mt-1.5 text-xs text-gray-400">
+                                    <span>₹{Math.round(detail.rent * 0.6).toLocaleString("en-IN")}</span>
+                                    <span>₹{Math.round(detail.rent * 1.5).toLocaleString("en-IN")}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <Divider />
+
+                        {/* Nearby Transit — placeholder */}
+                        <div className="px-4">
+                            <h3 className="text-base font-semibold text-gray-900 uppercase tracking-wide mb-2">Nearby Transit</h3>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-7 h-7 rounded-md bg-purple-100 flex items-center justify-center shrink-0">
+                                        <svg className="w-3.5 h-3.5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h8m-8 4h8m-4 4v4m-4-4h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v8a2 2 0 002 2zm-4 4h12" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-base text-gray-900 font-medium">Nearest Metro Station</div>
+                                        <div className="text-xs text-gray-400">Coming soon</div>
+                                    </div>
+                                    <span className="text-xs text-gray-300 shrink-0">-- min</span>
+                                </div>
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-7 h-7 rounded-md bg-blue-100 flex items-center justify-center shrink-0">
+                                        <svg className="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h8m-8 4h4m4 6H8a2 2 0 01-2-2V5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2zm-8 2h16" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-base text-gray-900 font-medium">Nearest Bus Stop</div>
+                                        <div className="text-xs text-gray-400">Coming soon</div>
+                                    </div>
+                                    <span className="text-xs text-gray-300 shrink-0">-- min</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <Divider />
+
+                        {/* Locality Scores — placeholder */}
+                        <div className="px-4">
+                            <h3 className="text-base font-semibold text-gray-900 uppercase tracking-wide mb-2">Locality Scores</h3>
+                            <div className="grid grid-cols-3 gap-2">
+                                {[
+                                    { label: "Safety", score: null, color: "bg-emerald-400" },
+                                    { label: "Connectivity", score: null, color: "bg-blue-400" },
+                                    { label: "Lifestyle", score: null, color: "bg-amber-400" },
+                                ].map(s => (
+                                    <div key={s.label} className="bg-gray-50 rounded-lg p-2 text-center">
+                                        <div className="text-lg font-bold text-gray-200">--</div>
+                                        <div className="text-xs text-gray-400 mt-0.5">{s.label}</div>
+                                    </div>
+                                ))}
+                            </div>
+                            <p className="text-xs text-gray-300 mt-1.5 text-center">Locality intelligence coming soon</p>
+                        </div>
+
+                        <Divider />
 
                         {/* Description */}
                         {detail.description && (
-                            <div className="px-5 pt-4">
-                                <h3 className="text-sm font-semibold text-gray-900 mb-1.5">About</h3>
-                                <p className="text-sm text-gray-600 leading-relaxed">{detail.description}</p>
-                            </div>
+                            <>
+                                <div className="px-4">
+                                    <h3 className="text-base font-semibold text-gray-900 uppercase tracking-wide mb-1.5">About</h3>
+                                    <p className="text-base text-gray-600 leading-relaxed">{detail.description}</p>
+                                </div>
+                                <Divider />
+                            </>
                         )}
 
                         {/* Amenities */}
                         {detail.amenities?.length > 0 && (
-                            <div className="px-5 pt-4">
-                                <h3 className="text-sm font-semibold text-gray-900 mb-2">Amenities</h3>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {detail.amenities.map(a => (
-                                        <span key={a} className="flex items-center gap-1.5 text-xs text-gray-600 bg-gray-50 border border-gray-100 rounded-full px-2.5 py-1">
-                                            <span className="w-1 h-1 rounded-full bg-[#f75c5f]" />
-                                            {a}
-                                        </span>
-                                    ))}
+                            <>
+                                <div className="px-4">
+                                    <h3 className="text-base font-semibold text-gray-900 uppercase tracking-wide mb-2">Amenities</h3>
+                                    <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                                        {detail.amenities.map(a => (
+                                            <div key={a} className="flex items-center gap-1.5 text-base text-gray-600">
+                                                <svg className="w-3 h-3 text-[#f75c5f] shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                                {a}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
+                                <Divider />
+                            </>
                         )}
 
-                        <div className="h-4" />
+                        {/* Report / Safety — placeholder */}
+                        <div className="px-4 pb-3 flex items-center justify-between">
+                            <button className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer transition-colors flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                                </svg>
+                                Report listing
+                            </button>
+                            <span className="text-xs text-gray-300">ID: {detail.id.slice(0, 8)}</span>
+                        </div>
                     </div>
 
                     {/* Sticky contact footer */}
-                    <div className="shrink-0 border-t border-gray-100 px-5 py-3 bg-white rounded-b-2xl">
+                    <div className="shrink-0 border-t border-gray-100 px-4 py-2.5 bg-white/90 backdrop-blur-sm rounded-b-2xl">
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                                <div className="w-9 h-9 rounded-full bg-gray-900 flex items-center justify-center text-xs font-bold text-white">
+                            <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center text-xs font-bold text-white">
                                     {detail.ownerName.charAt(0).toUpperCase()}
                                 </div>
                                 <div>
-                                    <div className="text-sm font-medium text-gray-900">{detail.ownerName}</div>
-                                    <div className="text-xs text-gray-500">{ownerTypeLabel[detail.ownerType] || detail.ownerType}</div>
+                                    <div className="text-base font-medium text-gray-900 leading-tight">{detail.ownerName}</div>
+                                    <div className="text-sm text-gray-400">{ownerTypeLabel[detail.ownerType] || detail.ownerType}</div>
                                 </div>
                             </div>
-                            {detail.ownerPhone && (
-                                <a
-                                    href={`tel:${detail.ownerPhone}`}
-                                    className="bg-[#f75c5f] hover:bg-[#e05558] text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors flex items-center gap-2"
-                                >
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                    </svg>
-                                    Call
-                                </a>
-                            )}
+                            <div className="flex items-center gap-2">
+                                <button className="text-base text-gray-600 font-medium px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors">
+                                    Message
+                                </button>
+                                {detail.ownerPhone && (
+                                    <a
+                                        href={`tel:${detail.ownerPhone}`}
+                                        className="bg-[#f75c5f] hover:bg-[#e05558] text-white text-base font-medium px-4 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                                    >
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                        </svg>
+                                        Call
+                                    </a>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </>
@@ -305,7 +450,7 @@ export default function ListingDetailPanel({ listingId, onClose, onLoaded }: Lis
                 </div>
             ) : null}
 
-            {/* Lightbox — portaled to body to escape transform context */}
+            {/* Lightbox */}
             {lightbox && images.length > 0 && createPortal(
                 <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center" onClick={() => setLightbox(false)}>
                     <img
