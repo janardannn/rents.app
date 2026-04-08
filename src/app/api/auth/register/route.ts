@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, password, phone, role } = parsed.data;
+    const { name, email, password, phone, role, ownerType } = parsed.data;
     const prisma = await getPrisma();
 
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const hashed = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
-      data: { name, email, password: hashed, phone, role },
+      data: { name, email, password: hashed, phone, role, ownerType: role === "OWNER" ? ownerType : undefined },
       select: { id: true, name: true, email: true, role: true, createdAt: true },
     });
 

@@ -29,30 +29,81 @@ function toGeoJSON(items: ListingResult[]): GeoJSON.FeatureCollection {
 }
 
 function createTeardropImage(): ImageData {
-    const size = 48;
+    const size = 80;
     const canvas = document.createElement("canvas");
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext("2d")!;
 
-    // Teardrop pin shape
     const cx = size / 2;
+    const r = cx - 8;
+
+    // Drop shadow
+    ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetY = 3;
+
+    // Teardrop pin shape
     ctx.beginPath();
-    ctx.moveTo(cx, size - 4);
-    ctx.bezierCurveTo(cx - 4, size - 14, 4, size * 0.45, 4, size * 0.35);
-    ctx.arc(cx, size * 0.35, cx - 4, Math.PI, 0, false);
-    ctx.bezierCurveTo(size - 4, size * 0.45, cx + 4, size - 14, cx, size - 4);
+    ctx.moveTo(cx, size - 6);
+    ctx.bezierCurveTo(cx - 6, size - 22, 8, size * 0.45, 8, size * 0.35);
+    ctx.arc(cx, size * 0.35, r, Math.PI, 0, false);
+    ctx.bezierCurveTo(size - 8, size * 0.45, cx + 6, size - 22, cx, size - 6);
     ctx.closePath();
 
     ctx.fillStyle = "#f75c5f";
     ctx.fill();
+
+    // Reset shadow for stroke
+    ctx.shadowColor = "transparent";
     ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.stroke();
 
     // Inner white circle
     ctx.beginPath();
-    ctx.arc(cx, size * 0.35, 6, 0, Math.PI * 2);
+    ctx.arc(cx, size * 0.35, 10, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+
+    return ctx.getImageData(0, 0, size, size);
+}
+
+function createSelectedTeardropImage(): ImageData {
+    const size = 96; // larger canvas for glow room
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d")!;
+
+    const cx = size / 2;
+    const r = cx - 14;
+
+    // Outer glow
+    ctx.shadowColor = "rgba(247, 92, 95, 0.6)";
+    ctx.shadowBlur = 16;
+    ctx.shadowOffsetY = 0;
+
+    // Teardrop — same coral
+    ctx.beginPath();
+    ctx.moveTo(cx, size - 10);
+    ctx.bezierCurveTo(cx - 6, size - 26, 14, size * 0.45, 14, size * 0.35);
+    ctx.arc(cx, size * 0.35, r, Math.PI, 0, false);
+    ctx.bezierCurveTo(size - 14, size * 0.45, cx + 6, size - 26, cx, size - 10);
+    ctx.closePath();
+
+    ctx.fillStyle = "#f75c5f";
+    ctx.fill();
+
+    // Reset shadow, thick white border
+    ctx.shadowColor = "transparent";
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Inner white circle
+    ctx.beginPath();
+    ctx.arc(cx, size * 0.35, 10, 0, Math.PI * 2);
     ctx.fillStyle = "#ffffff";
     ctx.fill();
 
@@ -61,8 +112,9 @@ function createTeardropImage(): ImageData {
 
 interface MapboxMapProps {
     listings?: ListingResult[];
-    flyTo?: { lng: number; lat: number } | null;
+    flyTo?: { lng: number; lat: number; zoom?: number; _t?: number } | null;
     onListingClick?: (listingId: string) => void;
+    selectedListingId?: string | null;
     showViewToggle?: boolean;
 }
 
@@ -72,7 +124,7 @@ function getInitialView(showToggle: boolean): "3D" | "2D" {
     return (localStorage.getItem(LS_KEY) as "2D" | "3D") || "3D";
 }
 
-export default function MapboxMap({ listings = [], flyTo, onListingClick, showViewToggle = false }: MapboxMapProps) {
+export default function MapboxMap({ listings = [], flyTo, onListingClick, selectedListingId, showViewToggle = false }: MapboxMapProps) {
 
     const mapContainer = useRef<HTMLDivElement | null>(null);
     const mapInstance = useRef<mapboxgl.Map | null>(null);
@@ -94,9 +146,9 @@ export default function MapboxMap({ listings = [], flyTo, onListingClick, showVi
         });
 
         map.on("load", () => {
-            // Canvas-drawn teardrop — fully synchronous
-            const imageData = createTeardropImage();
-            map.addImage("teardrop-marker", imageData, { pixelRatio: 2 });
+            // Canvas-drawn teardrops — fully synchronous
+            map.addImage("teardrop-marker", createTeardropImage(), { pixelRatio: 2 });
+            map.addImage("teardrop-marker-selected", createSelectedTeardropImage(), { pixelRatio: 2 });
 
             map.addSource(SOURCE_ID, {
                 type: "geojson",
@@ -158,24 +210,86 @@ export default function MapboxMap({ listings = [], flyTo, onListingClick, showVi
         }
     }, [listings]);
 
+    // Highlight selected pin — swap icon + bobbing animation
+    useEffect(() => {
+        const map = mapInstance.current;
+        if (!map || !sourceReady.current) return;
+
+        const sid = selectedListingId || "";
+
+        map.setLayoutProperty(LAYER_ID, "icon-image", [
+            "case",
+            ["==", ["get", "id"], sid],
+            "teardrop-marker-selected",
+            "teardrop-marker",
+        ]);
+
+        map.setLayoutProperty(LAYER_ID, "icon-size", [
+            "case",
+            ["==", ["get", "id"], sid],
+            1.3,
+            1,
+        ]);
+
+        // Bobbing via icon-offset animation
+        if (!selectedListingId) {
+            map.setLayoutProperty(LAYER_ID, "icon-offset", [0, 0]);
+            return;
+        }
+
+        let raf: number;
+        let start: number | null = null;
+        const bob = (ts: number) => {
+            if (!start) start = ts;
+            const elapsed = ts - start;
+            const y = Math.sin(elapsed / 400) * 3; // 3px bob
+            map.setLayoutProperty(LAYER_ID, "icon-offset", [
+                "case",
+                ["==", ["get", "id"], sid],
+                ["literal", [0, y]],
+                ["literal", [0, 0]],
+            ]);
+            raf = requestAnimationFrame(bob);
+        };
+        raf = requestAnimationFrame(bob);
+
+        return () => cancelAnimationFrame(raf);
+    }, [selectedListingId]);
+
     useEffect(() => {
         const map = mapInstance.current;
         if (!map || !flyTo) return;
 
-        const apply = () => {
-            map.flyTo({
-                center: [flyTo.lng, flyTo.lat],
-                zoom: 12,
-                pitch: view === "3D" ? 72 : 0,
-                duration: 1500,
+        if (!sourceReady.current) {
+            // Map hasn't loaded yet — capture values and defer
+            const { lng, lat, zoom } = flyTo;
+            const pitch = view === "3D" ? 72 : 0;
+            map.once("load", () => {
+                map.flyTo({
+                    center: [lng, lat],
+                    zoom: zoom ?? 16,
+                    pitch,
+                    duration: 1500,
+                });
             });
-        };
-
-        if (map.isStyleLoaded()) {
-            apply();
-        } else {
-            map.once("load", apply);
+            return;
         }
+
+        // Offset center left when detail panel is open (selected listing)
+        const hasPanel = !!selectedListingId;
+        const containerWidth = map.getContainer().clientWidth;
+        const panelWidth = containerWidth * 0.45;
+        const offsetX = hasPanel ? panelWidth / 2 : 0;
+
+        const opts: Parameters<typeof map.flyTo>[0] = {
+            center: [flyTo.lng, flyTo.lat],
+            pitch: view === "3D" ? 72 : 0,
+            duration: 1500,
+            offset: [-offsetX, 0],
+        };
+        if (flyTo.zoom != null) opts.zoom = flyTo.zoom;
+
+        map.flyTo(opts);
     }, [flyTo, view]);
 
     useEffect(() => {
@@ -197,7 +311,7 @@ export default function MapboxMap({ listings = [], flyTo, onListingClick, showVi
             {showViewToggle && (
                 <button
                     onClick={toggleView}
-                    className="fixed bottom-6 right-6 bg-white rounded-md shadow-lg px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer border border-gray-200 z-50"
+                    className="fixed bottom-6 right-6 bg-white rounded-md shadow-lg px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer border border-gray-200 z-30"
                 >
                     {view === "3D" ? "2D" : "3D"}
                 </button>

@@ -5,18 +5,20 @@ import type { ListingResult } from "@/types/listing";
 
 interface MapComponentProps {
     listings?: ListingResult[];
-    flyTo?: { lng: number; lat: number } | null;
+    flyTo?: { lng: number; lat: number; zoom?: number; _t?: number } | null;
     onListingClick?: (listingId: string) => void;
+    selectedListingId?: string | null;
     showViewToggle?: boolean;
 }
 
-const MapComponent = ({ listings = [], flyTo, onListingClick, showViewToggle = false }: MapComponentProps) => {
+const MapComponent = ({ listings = [], flyTo, onListingClick, selectedListingId, showViewToggle = false }: MapComponentProps) => {
     return (
         <div className="w-full h-full">
             <MapboxMap
                 listings={listings}
                 flyTo={flyTo}
                 onListingClick={onListingClick}
+                selectedListingId={selectedListingId}
                 showViewToggle={showViewToggle}
             />
         </div>

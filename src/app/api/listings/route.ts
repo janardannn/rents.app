@@ -11,8 +11,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!["OWNER", "BROKER"].includes(session.user.role)) {
-      return NextResponse.json({ error: "Only owners and brokers can create listings" }, { status: 403 });
+    if (session.user.role !== "OWNER") {
+      return NextResponse.json({ error: "Only owners can create listings" }, { status: 403 });
     }
 
     const body = await request.json();
@@ -25,17 +25,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { title, description, rent, propertyType, address, longitude, latitude, images } = parsed.data;
+    const {
+      title, description, rent, deposit, maintenance, propertyType, furnishing,
+      bedrooms, bathrooms, floor, totalFloors, area, amenities, availableFrom,
+      address, longitude, latitude, images,
+    } = parsed.data;
     const prisma = await getPrisma();
 
     const listing = await prisma.$queryRawUnsafe<{ id: string }[]>(
-      `INSERT INTO listings ("id", "title", "description", "rent", "propertyType", "address", "location", "images", "userId", "createdAt", "updatedAt")
-       VALUES (gen_random_uuid(), $1, $2, $3, $4::"PropertyType", $5, ST_SetSRID(ST_MakePoint($6, $7), 4326)::geography, $8, $9, NOW(), NOW())
+      `INSERT INTO listings (
+        "id", "title", "description", "rent", "deposit", "maintenance",
+        "propertyType", "furnishing", "bedrooms", "bathrooms", "floor", "totalFloors",
+        "area", "amenities", "availableFrom", "address", "location", "images",
+        "userId", "createdAt", "updatedAt"
+       )
+       VALUES (
+        gen_random_uuid(), $1, $2, $3, $4, $5,
+        $6::"PropertyType", $7::"FurnishingStatus", $8, $9, $10, $11,
+        $12, $13, $14, $15, ST_SetSRID(ST_MakePoint($16, $17), 4326)::geography, $18,
+        $19, NOW(), NOW()
+       )
        RETURNING "id"`,
       title,
       description,
       rent,
+      deposit ?? null,
+      maintenance ?? null,
       propertyType,
+      furnishing,
+      bedrooms ?? null,
+      bathrooms ?? null,
+      floor ?? null,
+      totalFloors ?? null,
+      area ?? null,
+      amenities,
+      availableFrom ? new Date(availableFrom) : null,
       address,
       longitude,
       latitude,

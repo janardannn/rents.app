@@ -10,10 +10,21 @@ interface ListingCardProps {
 const propertyTypeLabel: Record<string, string> = {
     PG: "PG",
     FLAT: "Flat",
-    SHARED: "Shared Room",
+    SHARED: "Shared",
+};
+
+const furnishingLabel: Record<string, string> = {
+    FURNISHED: "Furnished",
+    SEMI_FURNISHED: "Semi",
+    UNFURNISHED: "Unfurnished",
 };
 
 export default function ListingCard({ listing, onClick }: ListingCardProps) {
+    const details: string[] = [];
+    if (listing.bedrooms) details.push(`${listing.bedrooms} BHK`);
+    if (listing.area) details.push(`${listing.area} sqft`);
+    if (listing.furnishing) details.push(furnishingLabel[listing.furnishing] || listing.furnishing);
+
     return (
         <div
             onClick={() => onClick(listing)}
@@ -32,12 +43,15 @@ export default function ListingCard({ listing, onClick }: ListingCardProps) {
             )}
             <div className="flex flex-col justify-between min-w-0 flex-1">
                 <div>
-                    <h4 className="text-sm font-semibold text-gray-900 truncate">{listing.title}</h4>
-                    <p className="text-xs text-gray-500 truncate mt-0.5">{listing.address}</p>
+                    <h4 className="text-base font-semibold text-gray-900 truncate">{listing.title}</h4>
+                    <p className="text-sm text-gray-500 truncate mt-0.5">{listing.address}</p>
+                    {details.length > 0 && (
+                        <p className="text-sm text-gray-400 mt-0.5">{details.join(" · ")}</p>
+                    )}
                 </div>
                 <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-[#f75c5f]">₹{listing.rent.toLocaleString("en-IN")}/mo</span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-base font-bold text-[#f75c5f]">₹{listing.rent.toLocaleString("en-IN")}/mo</span>
+                    <span className="text-sm text-gray-500">
                         {propertyTypeLabel[listing.propertyType] || listing.propertyType} · {listing.ownerName}
                     </span>
                 </div>
